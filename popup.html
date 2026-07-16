@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!-- HBO Max Cookie Login — by Telegram @PKBTV @sackion -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    width: 420px;
+    background: #ffffff;
+    color: #111111;
+    padding: 20px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #5b21b6;
+  }
+  .header-icon {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .header-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .header-text h1 { font-size: 14px; font-weight: 700; color: #111; letter-spacing: -0.01em; }
+  .header-text p  { font-size: 10px; color: #999; margin-top: 2px; }
+
+  .label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #999;
+    margin-bottom: 6px;
+  }
+
+  .section { margin-bottom: 16px; }
+
+  .folder-row { display: flex; gap: 6px; }
+
+  #folder-input {
+    flex: 1;
+    background: #f5f5f5;
+    color: #111;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-size: 11px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  #folder-input:focus { border-color: #5b21b6; }
+  #folder-input::placeholder { color: #bbb; }
+
+  .btn-sm {
+    padding: 7px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-sm:active { transform: scale(0.97); }
+  #btn-load { background: #5b21b6; color: #fff; }
+  #btn-load:hover { opacity: 0.85; }
+  #btn-clear-folder { background: #f0f0f0; color: #555; border: 1.5px solid #e0e0e0; }
+  #btn-clear-folder:hover { background: #e5e5e5; }
+
+  #file-list-wrap {
+    display: none;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+    background: #fafafa;
+  }
+  #file-list-wrap.visible { display: block; }
+
+  #file-count {
+    font-size: 10px;
+    color: #aaa;
+    padding: 6px 10px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ebebeb;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  #file-list { max-height: 210px; overflow-y: auto; }
+  #file-list::-webkit-scrollbar { width: 3px; }
+  #file-list::-webkit-scrollbar-track { background: transparent; }
+  #file-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+  .file-item {
+    padding: 8px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #444;
+    transition: background 0.1s, color 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .file-item:last-child { border-bottom: none; }
+  .file-item::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #ddd;
+    flex-shrink: 0;
+  }
+  .file-item:hover { background: #5b21b6; color: #fff; }
+  .file-item:hover::before { background: #fff; }
+  .file-item.active { background: #5b21b6; color: #fff; }
+  .file-item.active::before { background: #fff; }
+
+  .divider {
+    height: 1px;
+    background: #e8e8e8;
+    margin: 16px 0;
+    position: relative;
+  }
+  .divider span {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 0 8px;
+    font-size: 9px;
+    color: #bbb;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  #drop {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px 14px;
+    text-align: center;
+    color: #aaa;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    margin-bottom: 10px;
+    line-height: 1.7;
+  }
+  #drop:hover { border-color: #aaa; color: #666; background: #fafafa; }
+  #drop.over  { border-color: #5b21b6; background: #f6f2fc; color: #5b21b6; }
+  #drop .drop-icon { font-size: 22px; display: block; margin-bottom: 5px; }
+  #drop .drop-sub  { font-size: 10px; color: #ccc; }
+  #drop.over .drop-sub { color: #7c4bce; }
+
+  textarea {
+    width: 100%;
+    height: 56px;
+    background: #fafafa;
+    color: #111;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 10px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: #5b21b6; }
+  textarea::placeholder { color: #ccc; }
+
+  #btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 11px;
+    background: #5b21b6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  #btn:hover   { opacity: 0.9; }
+  #btn:active  { transform: scale(0.99); }
+  #btn:disabled { background: #e5e5e5; color: #bbb; cursor: default; transform: none; opacity: 1; }
+
+  .btn-secondary {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px;
+    background: #f5f5f5;
+    color: #666;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  .btn-secondary:hover { background: #ececec; }
+
+  #status {
+    margin-top: 10px;
+    font-size: 11px;
+    min-height: 16px;
+    text-align: center;
+    font-weight: 500;
+  }
+  .ok   { color: #16a34a; }
+  .err  { color: #dc2626; }
+  .info { color: #7c3aed; }
+
+  .footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+    text-align: center;
+    font-size: 9px;
+    color: #ccc;
+    letter-spacing: 0.04em;
+  }
+  .footer a { color: #aaa; text-decoration: none; font-weight: 600; }
+  .footer a:hover { color: #5b21b6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon"><img src="icons/icon128.png" alt="logo"></div>
+  <div class="header-text">
+    <h1>HBO Max Cookie Login</h1>
+    <p>Auto-extracts the st token &amp; logs you in</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Cookie Folder</div>
+  <div class="folder-row">
+    <input id="folder-input" type="text" placeholder="Select a folder to load files…" readonly>
+    <button class="btn-sm" id="btn-load">Load</button>
+    <button class="btn-sm" id="btn-clear-folder">Clear</button>
+  </div>
+  <div id="file-list-wrap">
+    <div id="file-count"></div>
+    <div id="file-list"></div>
+  </div>
+</div>
+
+<div class="divider"><span>or</span></div>
+
+<div class="section">
+  <div class="label">Drop / Paste Full Cookie</div>
+  <div id="drop">
+    <span class="drop-icon">📂</span>
+    Drop a <code>.txt</code> or <code>.json</code> cookie file here
+    <div class="drop-sub">Full cookie · JSON (Cookie-Editor) · Netscape · or a bare st token · click to browse</div>
+  </div>
+  <input type="file" id="file-input" accept=".txt,.json" style="display:none">
+
+  <textarea id="json-input" placeholder="Paste the full cookie, or just the st token here…"></textarea>
+
+  <button id="btn">Login to HBO Max</button>
+  <button class="btn-secondary" id="btn-clear-token">Clear active token</button>
+  <div id="status"></div>
+</div>
+
+<div class="footer">
+  Telegram <a href="https://t.me/PKBTV">@PKBTV</a> &nbsp;·&nbsp; <a href="https://t.me/sackion">@sackion</a>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "HBO Max Cookie Login",
+  "version": "1.0",
+  "description": "Log into HBO Max / Max with a session cookie. Paste the full cookie or pick a file — it extracts the st token and injects it into api.hbomax.com automatically. By @PKBTV @sackion",
+  "permissions": [
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://*.hbomax.com/*",
+    "https://*.max.com/*",
+    "https://*.hbo.com/*"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "HBO Max Cookie Login",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html", "popup.js", "icons/*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
